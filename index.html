@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DYSTECH | Componentes Electrónicos</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+}
+
+header {
+    background: #111827;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+}
+
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.search-box {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.search-box input {
+    width: 80%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.categories {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.categories button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+.categories button:hover {
+    background: #1d4ed8;
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.card img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+}
+
+.card h3 {
+    margin: 10px 0 5px;
+}
+
+.price {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.card button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #25D366;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>DYSTECH</h1>
+    <p>Componentes Electrónicos en Fusagasugá</p>
+</header>
+
+<div class="container">
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Buscar producto..." onkeyup="searchProducts()">
+</div>
+
+<div class="categories">
+    <button onclick="filterCategory('all')">Todos</button>
+    <button onclick="filterCategory('resistencias')">Resistencias</button>
+    <button onclick="filterCategory('capacitores')">Capacitores</button>
+    <button onclick="filterCategory('arduino')">Arduino</button>
+</div>
+
+<div class="products" id="productList"></div>
+</div>
+
+<script>
+// ============================================================
+// BASE DE DATOS DE PRODUCTOS
+// ============================================================
+const productos = [
+    // RESISTENCIAS
+    { id: 1, nombre: "Resistencia 220Ω", categoria: "resistencias", precio: "$200 COP", imagen: "Imagenes/Resistencias/220.jpg" },
+    { id: 2, nombre: "Resistencia 1kΩ", categoria: "resistencias", precio: "$200 COP", imagen: "Imagenes/Resistencias/1k.jpg" },
+    { id: 3, nombre: "Resistencia 10kΩ", categoria: "resistencias", precio: "$200 COP", imagen: "https://via.placeholder.com/120" },
+    
+    // CAPACITORES
+    { id: 123, nombre: "Capacitor 100µF", categoria: "capacitores", precio: "$500 COP", imagen: "https://via.placeholder.com/120" },
+    { id: 5, nombre: "Capacitor 10µF", categoria: "capacitores", precio: "$400 COP", imagen: "https://via.placeholder.com/120" },
+    
+    // ARDUINO
+    { id: 6, nombre: "Arduino UNO", categoria: "arduino", precio: "$45.000 COP", imagen: "https://via.placeholder.com/120" },
+    { id: 7, nombre: "Arduino NANO", categoria: "arduino", precio: "$35.000 COP", imagen: "https://via.placeholder.com/120" },
+];
+
+// ============================================================
+// INICIALIZAR PÁGINA
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    generarCategorias();
+    generarProductos(productos);
+});
+
+// ============================================================
+// GENERAR CATEGORÍAS DINÁMICAMENTE
+// ============================================================
+function generarCategorias() {
+    const categoriesList = document.querySelector('.categories');
+    const categorias = ['all', ...new Set(productos.map(p => p.categoria))];
+    
+    categoriesList.innerHTML = ''; // Limpiar botones existentes
+    
+    categorias.forEach(categoria => {
+        const btn = document.createElement('button');
+        btn.textContent = categoria === 'all' ? 'Todos' : categoria.charAt(0).toUpperCase() + categoria.slice(1);
+        btn.onclick = () => filterCategory(categoria);
+        categoriesList.appendChild(btn);
+    });
+}
+
+// ============================================================
+// GENERAR PRODUCTOS DINÁMICAMENTE
+// ============================================================
+function generarProductos(listaProductos) {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = ''; // Limpiar productos existentes
+    
+    listaProductos.forEach(producto => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.category = producto.categoria;
+        
+        card.innerHTML = `
+            <img src="${producto.imagen}" alt="${producto.nombre}">
+            <h3>${producto.nombre}</h3>
+            <p class="price">${producto.precio}</p>
+            <button onclick="buy('${producto.nombre}')">Comprar</button>
+        `;
+        
+        productList.appendChild(card);
+    });
+}
+
+// ============================================================
+// BÚSQUEDA DE PRODUCTOS
+// ============================================================
+function searchProducts() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let cards = document.querySelectorAll(".card");
+
+    cards.forEach(card => {
+        let title = card.querySelector("h3").innerText.toLowerCase();
+        card.style.display = title.includes(input) ? "block" : "none";
+    });
+}
+
+// ============================================================
+// FILTRAR POR CATEGORÍA
+// ============================================================
+function filterCategory(category) {
+    let cards = document.querySelectorAll(".card");
+
+    cards.forEach(card => {
+        if (category === "all") {
+            card.style.display = "block";
+        } else {
+            card.style.display = card.dataset.category === category ? "block" : "none";
+        }
+    });
+}
+
+// ============================================================
+// ENVIAR A WHATSAPP
+// ============================================================
+function buy(product) {
+    let phone = "573503411501"; // Cambia por tu número
+    let message = `Hola, quiero comprar ${product} de DYSTECH`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+}
+</script>
+
+</body>
+</html>
